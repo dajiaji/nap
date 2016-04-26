@@ -11,6 +11,7 @@ type Stmt interface {
 	Exec(...interface{}) (sql.Result, error)
 	Query(...interface{}) (*sql.Rows, error)
 	QueryRow(...interface{}) *sql.Row
+	MasterStmt() *sql.Stmt
 }
 
 type stmt struct {
@@ -48,4 +49,8 @@ func (s *stmt) Query(args ...interface{}) (*sql.Rows, error) {
 // QueryRow uses a slave as the underlying physical db.
 func (s *stmt) QueryRow(args ...interface{}) *sql.Row {
 	return s.stmts[s.db.slave(len(s.db.pdbs))].QueryRow(args...)
+}
+
+func (s *stmt) MasterStmt() *sql.Stmt {
+	return s.stmts[0]
 }
